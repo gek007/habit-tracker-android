@@ -5,8 +5,8 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHabitsContext } from '@/context/habits-context';
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: 4,
     paddingBottom: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',

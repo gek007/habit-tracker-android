@@ -4,8 +4,8 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHabitsContext } from '@/context/habits-context';
 import { StatsChart } from '@/components/stats-chart';
