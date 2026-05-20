@@ -25,19 +25,42 @@ expo-env.d.ts
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
 
 # macOS
 .DS_Store
 *.pem
 
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
 # local env files
-.env*.local
+.env
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo
+
+# testing / coverage
+coverage/
+
+# EAS
+.eas/
 
 app-example
 
 # generated native folders
 /ios
 /android
+
+# AI / editor (local only — do not push)
+.agents/
+.claude/
+.cursor/
+skills-lock.json
+
+# Local guide screenshots (referenced by STEP_BY_STEP.md, not app assets)
+image/GUIDE/
