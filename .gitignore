@@ -63,4 +63,8 @@ app-example
 skills-lock.json
 
 # Local guide screenshots (referenced by STEP_BY_STEP.md, not app assets)
-image/GUIDE/
+image/
+
+# Supabase CLI (local link/cache state — do not push)
+supabase/.temp/
+supabase/.branches/

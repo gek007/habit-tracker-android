@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { upsertChallenge, deleteChallengeRemote } from '@/services/sync';
 
 export interface Challenge {
   id: string;
@@ -15,7 +17,7 @@ export interface Challenge {
 
 const STORAGE_KEY = 'challenges';
 
-export function useChallenges() {
+export function useChallenges(userId: string | null) {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,13 +38,11 @@ export function useChallenges() {
     }
   };
 
-  const saveChallenges = async (updatedChallenges: Challenge[]) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedChallenges));
-      setChallenges(updatedChallenges);
-    } catch (error) {
-      console.error('Failed to save challenges:', error);
-    }
+  const saveChallenges = (updatedChallenges: Challenge[]) => {
+    setChallenges(updatedChallenges);
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedChallenges)).catch((error) =>
+      console.error('Failed to save challenges:', error)
+    );
   };
 
   const createChallenge = async (
@@ -53,7 +53,7 @@ export function useChallenges() {
   ) => {
     const today = new Date().toISOString().split('T')[0];
     const newChallenge: Challenge = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       name,
       description,
       startDate: today,
@@ -63,25 +63,39 @@ export function useChallenges() {
       rewardClaimed: false,
     };
     const updated = [...challenges, newChallenge];
-    await saveChallenges(updated);
+    saveChallenges(updated);
+    if (userId) {
+      upsertChallenge(newChallenge, userId).catch(console.error);
+    }
     return newChallenge;
   };
 
   const deleteChallenge = async (id: string) => {
     const updated = challenges.filter((c) => c.id !== id);
-    await saveChallenges(updated);
+    saveChallenges(updated);
+    if (userId) {
+      deleteChallengeRemote(id).catch(console.error);
+    }
   };
 
   const completeChallenge = async (id: string) => {
     const updated = challenges.map((c) =>
       c.id === id ? { ...c, completed: true, completedAt: new Date().toISOString() } : c
     );
-    await saveChallenges(updated);
+    saveChallenges(updated);
+    const updatedChallenge = updated.find((c) => c.id === id);
+    if (userId && updatedChallenge) {
+      upsertChallenge(updatedChallenge, userId).catch(console.error);
+    }
   };
 
   const claimReward = async (id: string) => {
     const updated = challenges.map((c) => (c.id === id ? { ...c, rewardClaimed: true } : c));
-    await saveChallenges(updated);
+    saveChallenges(updated);
+    const updatedChallenge = updated.find((c) => c.id === id);
+    if (userId && updatedChallenge) {
+      upsertChallenge(updatedChallenge, userId).catch(console.error);
+    }
   };
 
   const getActiveChallenge = (): Challenge | undefined => {
@@ -114,6 +128,7 @@ export function useChallenges() {
   return {
     challenges,
     loading,
+    setChallenges,
     createChallenge,
     deleteChallenge,
     completeChallenge,

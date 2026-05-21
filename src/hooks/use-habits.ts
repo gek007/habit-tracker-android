@@ -1,6 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { normalizeHabitIcon } from '@/utils/habit-icon';
+import { runUUIDMigration } from '@/utils/migrations';
+import {
+  upsertHabit,
+  upsertHabitEntries,
+  deleteHabitRemote,
+} from '@/services/sync';
 
 export type HabitType = 'daily' | 'volume';
 
@@ -23,7 +30,7 @@ export interface Habit {
 
 const STORAGE_KEY = 'habits';
 
-export function useHabits() {
+export function useHabits(userId: string | null) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,9 +64,27 @@ export function useHabits() {
           }
           return { ...base, icon: normalizedIcon };
         });
-        setHabits(migrated);
+
+        // UUID migration
+        const uuidMigrated = await AsyncStorage.getItem('uuid_migration_v1');
+        let finalHabits = migrated;
+        if (!uuidMigrated) {
+          const stored2 = await AsyncStorage.getItem('challenges');
+          const challenges = stored2 ? JSON.parse(stored2) : [];
+          const { habits: newHabits, challenges: newChallenges } = runUUIDMigration(
+            migrated,
+            challenges
+          );
+          finalHabits = newHabits;
+          needsSave = true;
+          // Update challenges with remapped ids
+          await AsyncStorage.setItem('challenges', JSON.stringify(newChallenges));
+          await AsyncStorage.setItem('uuid_migration_v1', 'done');
+        }
+
+        setHabits(finalHabits);
         if (needsSave) {
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(finalHabits));
         }
       }
     } catch (error) {
@@ -69,13 +94,11 @@ export function useHabits() {
     }
   };
 
-  const saveHabits = async (updatedHabits: Habit[]) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHabits));
-      setHabits(updatedHabits);
-    } catch (error) {
-      console.error('Failed to save habits:', error);
-    }
+  const saveHabits = (updatedHabits: Habit[]) => {
+    setHabits(updatedHabits);
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHabits)).catch((error) =>
+      console.error('Failed to save habits:', error)
+    );
   };
 
   const addHabit = async (
@@ -86,7 +109,7 @@ export function useHabits() {
     color: string = '#d4af37'
   ) => {
     const newHabit: Habit = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       name,
       type,
       goal,
@@ -96,16 +119,23 @@ export function useHabits() {
       entries: [],
     };
     const updated = [...habits, newHabit];
-    await saveHabits(updated);
+    saveHabits(updated);
+    if (userId) {
+      upsertHabit(newHabit, userId).catch(console.error);
+    }
     return newHabit;
   };
 
   const deleteHabit = async (id: string) => {
     const updated = habits.filter((h) => h.id !== id);
-    await saveHabits(updated);
+    saveHabits(updated);
+    if (userId) {
+      deleteHabitRemote(id).catch(console.error);
+    }
   };
 
   const updateHabitEntry = async (id: string, date: string, count: number) => {
+    console.log(`[habits] updateHabitEntry: id=${id}, date=${date}, count=${count}, userId=${userId}`);
     const updated = habits.map((h) => {
       if (h.id === id) {
         const entryIndex = h.entries.findIndex((e) => e.date === date);
@@ -122,7 +152,16 @@ export function useHabits() {
       }
       return h;
     });
-    await saveHabits(updated);
+    saveHabits(updated);
+    if (userId) {
+      const updatedHabit = updated.find((h) => h.id === id);
+      if (updatedHabit) {
+        console.log(`[habits] Syncing ${updatedHabit.entries.length} entries for habit ${id}`);
+        upsertHabitEntries(updatedHabit).catch((e) => console.error('[habits] Sync error:', e));
+      }
+    } else {
+      console.log('[habits] No userId, skipping sync');
+    }
   };
 
   const getHabitEntry = (id: string, date: string): number => {
@@ -153,6 +192,7 @@ export function useHabits() {
   return {
     habits,
     loading,
+    setHabits,
     addHabit,
     deleteHabit,
     updateHabitEntry,

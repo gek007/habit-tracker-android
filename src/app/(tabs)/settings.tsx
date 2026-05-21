@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHabitsContext } from '@/context/habits-context';
+import { useAuth } from '@/context/auth-context';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   getNotificationPrefs,
@@ -21,10 +22,12 @@ import {
 
 export default function SettingsScreen() {
   const { habits } = useHabitsContext();
+  const { signOut } = useAuth();
   const [morningTime, setMorningTime] = useState('08:00');
   const [eveningTime, setEveningTime] = useState('19:00');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     loadPreferences();
@@ -102,6 +105,11 @@ export default function SettingsScreen() {
     } catch (error) {
       console.error('Failed to update time:', error);
     }
+  };
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    await signOut();
   };
 
   if (isLoading) {
@@ -271,6 +279,23 @@ export default function SettingsScreen() {
             </Text>
           </View>
         </View>
+
+        <View style={styles.section}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleSignOut}
+            disabled={isSigningOut}
+          >
+            {isSigningOut ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <MaterialCommunityIcons name="logout" size={20} color="#fff" />
+                <Text style={styles.logoutText}>Sign Out</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -421,5 +446,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ff6b6b',
+    borderRadius: 12,
+    padding: 16,
+    gap: 8,
+  },
+  logoutText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
 });
