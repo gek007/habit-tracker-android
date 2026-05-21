@@ -17,11 +17,37 @@ npx expo start --clear
 
 # Type-check without emitting
 npx tsc --noEmit
+
+# Deploy edge functions to Supabase (requires CLI linked to project)
+supabase functions deploy generate-coaching
+supabase functions deploy generate-summary
+
+# Set OpenAI API key in Supabase (for edge functions)
+supabase secrets set OPENAI_API_KEY=sk-proj-...
+
+# Link Supabase CLI to project (one-time setup)
+supabase link --project-ref <project-ref>
 ```
 
 There is no test suite. There is no build script — the app is run via Expo Go on device.
 
 **Windows note:** The Metro file watcher has a known crash on Windows with Expo devtools temp dirs. `metro.config.js` already has a `blockList` fix for this. If Metro crashes on startup, kill any process on port 8081 first.
+
+## Supabase Edge Functions
+
+Edge functions are serverless Deno functions deployed to Supabase. They're used for AI Coaching (calling OpenAI API, querying DB). **Local development** does not require running functions locally — the mobile app calls them on your Supabase project in the cloud.
+
+**Before deploying edge functions:**
+1. Ensure Supabase CLI is installed and linked: `supabase status`
+2. Set `OPENAI_API_KEY` as a Supabase secret (visible in dashboard → Edge Functions → Secrets)
+3. Verify `ai_insights` table exists in your Supabase DB
+
+**Debugging edge function errors:**
+- Supabase Dashboard → Edge Functions → click function name → Logs tab shows execution logs and errors
+- Invocations tab shows HTTP request/response status and metadata
+- `EarlyDrop` reason usually means the function crashed with an uncaught error
+- Common issues: missing secrets, DB query failures, API call failures (check OpenAI API key)
+- Redeploy after code changes: `supabase functions deploy <function-name>`
 
 ## Architecture
 

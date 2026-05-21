@@ -141,8 +141,10 @@ And then you'll also have to update the database and do everything like that to 
 
 ![1779368582716](image/STEP_BY_STEP/1779368582716.png)
 
-# Deploy serverless functions to Supabase 
+# Deploy serverless functions to Supabase (AI-powered)
 
    supabase link --project-ref jnaqxcpauwlcmwkqkwsn
    supabase functions deploy generate-coaching
    supabase functions deploy generate-summary
+
+   
