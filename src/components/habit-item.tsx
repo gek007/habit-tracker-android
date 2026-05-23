@@ -4,8 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Switch,
-  Dimensions,
 } from 'react-native';
 import Animated, {
   useSharedValue,

@@ -14,7 +14,7 @@ import { playCelebrationSound } from '@/services/sounds';
 
 export default function CelebrateScreen() {
   const router = useRouter();
-  const [confetti, setConfetti] = useState<Array<{ id: number }>>([]);
+  const [confetti, setConfetti] = useState<{ id: number }[]>([]);
   const scaleAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export default function CelebrateScreen() {
 
         <Text style={styles.title}>Challenge Completed! 🎉</Text>
         <Text style={styles.subtitle}>
-          You've successfully completed this challenge. Keep up the amazing
+          You&apos;ve successfully completed this challenge. Keep up the amazing
           work!
         </Text>
 

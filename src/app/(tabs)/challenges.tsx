@@ -14,7 +14,7 @@ import { ChallengeCard } from '@/components/challenge-card';
 
 export default function ChallengesScreen() {
   const router = useRouter();
-  const { challenges, habits, getChallengeProgress, getDaysRemaining, getHabitEntry, claimReward } =
+  const { challenges, getChallengeProgress, getDaysRemaining, getHabitEntry, claimReward } =
     useHabitsContext();
   const [today] = React.useState(new Date().toISOString().split('T')[0]);
 

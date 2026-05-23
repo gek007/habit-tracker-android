@@ -123,7 +123,7 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: '#999', marginRight: 5 }}>Don't have an account?</Text>
+          <Text style={{ color: '#999', marginRight: 5 }}>Don&apos;t have an account?</Text>
           <TouchableOpacity
             onPress={() => router.push('./signup')}
             disabled={isSubmitting}

@@ -34,57 +34,58 @@ export function HabitsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!user || migrationDone) return;
-    runFirstLoginMigration();
-  }, [user]);
 
-  const runFirstLoginMigration = async () => {
-    if (!userId) {
-      setMigrationDone(true);
-      return;
-    }
-
-    const migrationKey = `supabase_migrated_${userId}`;
-    const alreadyMigrated = await AsyncStorage.getItem(migrationKey);
-    if (alreadyMigrated === 'true') {
-      setMigrationDone(true);
-      return;
-    }
-
-    try {
-      const localHabitsRaw = await AsyncStorage.getItem('habits');
-      const localChallengesRaw = await AsyncStorage.getItem('challenges');
-
-      if (!localHabitsRaw && !localChallengesRaw) {
-        // No local data — fetch from Supabase and populate local cache
-        const remote = await fetchAllRemoteData(userId);
-        if (remote) {
-          await AsyncStorage.setItem('habits', JSON.stringify(remote.habits));
-          await AsyncStorage.setItem('challenges', JSON.stringify(remote.challenges));
-          habits.setHabits(remote.habits);
-          challenges.setChallenges(remote.challenges);
-        }
-        await AsyncStorage.setItem(migrationKey, 'true');
+    const runFirstLoginMigration = async () => {
+      if (!userId) {
         setMigrationDone(true);
         return;
       }
 
-      // Local data exists — upload it
-      const localHabits: Habit[] = localHabitsRaw ? JSON.parse(localHabitsRaw) : [];
-      const localChallenges: Challenge[] = localChallengesRaw ? JSON.parse(localChallengesRaw) : [];
-
-      const result = await uploadAllLocalData(localHabits, localChallenges, userId);
-
-      if (result.success) {
-        await AsyncStorage.setItem(migrationKey, 'true');
-      } else {
-        console.warn('First-login migration failed:', result.error);
+      const migrationKey = `supabase_migrated_${userId}`;
+      const alreadyMigrated = await AsyncStorage.getItem(migrationKey);
+      if (alreadyMigrated === 'true') {
+        setMigrationDone(true);
+        return;
       }
-      setMigrationDone(true);
-    } catch (e) {
-      console.error('First-login migration error:', e);
-      setMigrationDone(true);
-    }
-  };
+
+      try {
+        const localHabitsRaw = await AsyncStorage.getItem('habits');
+        const localChallengesRaw = await AsyncStorage.getItem('challenges');
+
+        if (!localHabitsRaw && !localChallengesRaw) {
+          // No local data — fetch from Supabase and populate local cache
+          const remote = await fetchAllRemoteData(userId);
+          if (remote) {
+            await AsyncStorage.setItem('habits', JSON.stringify(remote.habits));
+            await AsyncStorage.setItem('challenges', JSON.stringify(remote.challenges));
+            habits.setHabits(remote.habits);
+            challenges.setChallenges(remote.challenges);
+          }
+          await AsyncStorage.setItem(migrationKey, 'true');
+          setMigrationDone(true);
+          return;
+        }
+
+        // Local data exists — upload it
+        const localHabits: Habit[] = localHabitsRaw ? JSON.parse(localHabitsRaw) : [];
+        const localChallenges: Challenge[] = localChallengesRaw ? JSON.parse(localChallengesRaw) : [];
+
+        const result = await uploadAllLocalData(localHabits, localChallenges, userId);
+
+        if (result.success) {
+          await AsyncStorage.setItem(migrationKey, 'true');
+        } else {
+          console.warn('First-login migration failed:', result.error);
+        }
+        setMigrationDone(true);
+      } catch (e) {
+        console.error('First-login migration error:', e);
+        setMigrationDone(true);
+      }
+    };
+
+    runFirstLoginMigration();
+  }, [user, migrationDone, userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value: HabitsContextValue = {
     habits: habits.habits,

@@ -9,7 +9,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHabitsContext } from '@/context/habits-context';
 import { StatsChart } from '@/components/stats-chart';
-import { StreakBadge } from '@/components/streak-badge';
 import { resolveHabitIcon } from '@/utils/habit-icon';
 
 export default function StatsScreen() {

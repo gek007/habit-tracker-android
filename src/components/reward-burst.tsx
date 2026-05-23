@@ -8,7 +8,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 
-interface Particle {
+interface ParticleData {
   id: number;
   angle: number;
   distance: number;
@@ -20,7 +20,7 @@ interface RewardBurstProps {
 }
 
 export function RewardBurst({ onComplete, size = 80 }: RewardBurstProps) {
-  const particles: Particle[] = Array.from({ length: 12 }).map((_, i) => ({
+  const particles: ParticleData[] = Array.from({ length: 12 }).map((_, i) => ({
     id: i,
     angle: (i / 12) * Math.PI * 2,
     distance: 150,
@@ -91,7 +91,7 @@ function Particle({ angle, distance, onComplete }: ParticleProps) {
       duration: 800,
       easing: Easing.out(Easing.cubic),
     });
-  }, [angle, distance, translateX, translateY, opacity, scale]);
+  }, [angle, distance, translateX, translateY, opacity, scale, onComplete]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [

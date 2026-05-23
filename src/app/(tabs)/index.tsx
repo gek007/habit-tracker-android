@@ -53,7 +53,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Today's Habits</Text>
+          <Text style={styles.greeting}>Today&apos;s Habits</Text>
           <Text style={styles.date}>
             {new Date(today).toLocaleDateString('en-US', {
               weekday: 'long',

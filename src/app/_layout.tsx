@@ -1,7 +1,7 @@
 import 'react-native-get-random-values';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { useEffect, useState, ReactNode } from 'react';
+import { Stack, useRouter } from 'expo-router';
+import { useEffect, ReactNode } from 'react';
 import { useColorScheme, View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -10,7 +10,7 @@ import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { HabitsProvider } from '@/context/habits-context';
 import { AuthProvider, useAuth } from '@/context/auth-context';
 import { initializeSounds } from '@/services/sounds';
-import { initializeNotifications, requestNotificationPermissions } from '@/services/notifications';
+import { initializeNotifications } from '@/services/notifications';
 
 function AuthGate({ children }: { children: ReactNode }) {
   const { session, isLoading } = useAuth();
@@ -28,23 +28,23 @@ function AuthGate({ children }: { children: ReactNode }) {
       console.log('[routing] Session exists, checking onboarding');
       checkOnboarding();
     }
-  }, [session, isLoading]);
 
-  const checkOnboarding = async () => {
-    try {
-      const completed = await AsyncStorage.getItem('onboarding_complete');
-      console.log('[routing] Onboarding completed:', completed === 'true');
-      if (completed === 'true') {
-        console.log('[routing] Going to (tabs)');
-        router.replace('/(tabs)' as any);
-      } else {
-        console.log('[routing] Going to onboarding');
-        router.replace('/onboarding');
+    const checkOnboarding = async () => {
+      try {
+        const completed = await AsyncStorage.getItem('onboarding_complete');
+        console.log('[routing] Onboarding completed:', completed === 'true');
+        if (completed === 'true') {
+          console.log('[routing] Going to (tabs)');
+          router.replace('/(tabs)' as any);
+        } else {
+          console.log('[routing] Going to onboarding');
+          router.replace('/onboarding');
+        }
+      } catch (e) {
+        console.error('[routing] Onboarding check error:', e);
       }
-    } catch (e) {
-      console.error('[routing] Onboarding check error:', e);
-    }
-  };
+    };
+  }, [session, isLoading, router]);
 
   if (isLoading) {
     return (

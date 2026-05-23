@@ -45,7 +45,7 @@ export default function SignupScreen() {
             Verify Your Email
           </Text>
           <Text style={{ fontSize: 16, color: '#999', marginBottom: 20, textAlign: 'center' }}>
-            We've sent a confirmation link to:
+            We&apos;ve sent a confirmation link to:
           </Text>
           <Text style={{ fontSize: 16, color: '#d4af37', marginBottom: 30, fontWeight: '600' }}>
             {email}

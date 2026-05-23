@@ -73,7 +73,6 @@ export default function OnboardingScreen() {
         habitIds.push(created.id);
       }
 
-      const today = new Date().toISOString().split('T')[0];
       await createChallenge(
         '3-Day Kickstart',
         'Complete your habits for 3 days',
@@ -124,16 +123,6 @@ export default function OnboardingScreen() {
       <View style={styles.footer}>
         <View style={styles.dots}>
           {[0, 1, 2].map((index) => {
-            const opacity = scrollX.interpolate({
-              inputRange: [
-                (index - 1) * SCREEN_WIDTH,
-                index * SCREEN_WIDTH,
-                (index + 1) * SCREEN_WIDTH,
-              ],
-              outputRange: [0.3, 1, 0.3],
-              extrapolate: 'clamp',
-            });
-
             return (
               <Animated.View
                 key={index}
@@ -211,7 +200,7 @@ function OnboardingScreen2() {
         showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Your 3-Day Kickstart</Text>
         <Text style={[styles.subtitle, styles.subtitleSpaced]}>
-          We've prepared these habits to get you started
+          We&apos;ve prepared these habits to get you started
         </Text>
 
         {PRESET_HABITS.map((habit, index) => (
