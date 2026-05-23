@@ -1,6 +1,8 @@
 https://www.youtube.com/watch?v=BMMcmmnjrM8
 
- # 1. I want to build a mobile app with Expo and React Native. Set up my workspace for me.
+ # 1. I want to build a mobile app using Claude, Expo and React Native. 
+ #     Should work on all devices      
+ #     Scaffold me out the workspace in the current folder  
 
 Here's what was set up:
 
@@ -129,7 +131,7 @@ Note: There's no supabase connect command. You use:
 
 ![1779363959606](image/STEP_BY_STEP/1779363959606.png)
 
-# add Smart coaching / nudges
+# add Smart coaching / nudges (AI-powered)
 
 Smart coaching / nudges
 
